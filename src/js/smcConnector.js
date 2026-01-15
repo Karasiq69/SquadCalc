@@ -13,7 +13,7 @@ let connectionInterval = null;
  * @returns {Promise<void>} A promise that resolves when initialization is complete
  */
 export async function initWebSocket() {
-    if (process.env.WEBSOCKET != "true") return;
+    if (process.env.SMO_WEBSOCKET != "true") return;
     if (isConnecting) return;
     startConnectionAttempts();
 }
@@ -74,7 +74,7 @@ async function setupWebSockets() {
             if (event.data === "Map" && socketMap.readyState === WebSocket.OPEN) socketMap.send(App.minimap.activeMap.name);
 
             if (event.data === "MapData") {
-                let imageUrl = `${App.minimap.activeMap.mapURL}basemap.webp`;
+                let imageUrl = `${process.env.API_URL}${App.minimap.activeMap.mapURL}basemap.webp`;
                 const response = await fetch(imageUrl);
                 const imageBlob = await response.blob();
                 const reader = new FileReader();

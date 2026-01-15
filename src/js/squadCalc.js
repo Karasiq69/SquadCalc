@@ -16,6 +16,7 @@ import packageInfo from "../../package.json";
 import i18next from "i18next";
 import SquadLayer from "./squadLayer.js";
 import { serverBrowserTooltips } from "./tooltips.js";
+import { MapDrawing, MapArrow, MapCircle, MapRectangle } from "./squadShapes.js";
 
 
 
@@ -296,7 +297,6 @@ export default class SquadCalc {
         WEAPONS.forEach((weapon, index, arr) => {
             arr[index] = new Weapon(
                 weapon.name,
-                weapon.velocity,
                 weapon.deceleration,
                 weapon.decelerationTime,
                 weapon.gravityScale,
@@ -307,13 +307,6 @@ export default class SquadCalc {
                 weapon.type,
                 weapon.angleType,
                 weapon.elevationPrecision,
-                weapon.minDistance,
-                weapon.moa,
-                weapon.explosionDamage,
-                weapon.explosionRadius[0],
-                weapon.explosionRadius[1],
-                weapon.explosionDistanceFromImpact,
-                weapon.damageFallOff,
                 weapon.shells,
                 weapon.heightOffset,
                 weapon.angleOffset,
@@ -400,7 +393,7 @@ export default class SquadCalc {
 
     closeMenu() {
         $("#footerButtons").removeClass("expanded");
-        $(".fab4").html("<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 448 512'><path d='M224 0c17.7 0 32 14.3 32 32l0 30.1 15-15c9.4-9.4 24.6-9.4 33.9 0s9.4 24.6 0 33.9l-49 49 0 70.3 61.4-35.8 17.7-66.1c3.4-12.8 16.6-20.4 29.4-17s20.4 16.6 17 29.4l-5.2 19.3 23.6-13.8c15.3-8.9 34.9-3.7 43.8 11.5s3.8 34.9-11.5 43.8l-25.3 14.8 21.7 5.8c12.8 3.4 20.4 16.6 17 29.4s-16.6 20.4-29.4 17l-67.7-18.1L287.5 256l60.9 35.5 67.7-18.1c12.8-3.4 26 4.2 29.4 17s-4.2 26-17 29.4l-21.7 5.8 25.3 14.8c15.3 8.9 20.4 28.5 11.5 43.8s-28.5 20.4-43.8 11.5l-23.6-13.8 5.2 19.3c3.4 12.8-4.2 26-17 29.4s-26-4.2-29.4-17l-17.7-66.1L256 311.7l0 70.3 49 49c9.4 9.4 9.4 24.6 0 33.9s-24.6 9.4-33.9 0l-15-15 0 30.1c0 17.7-14.3 32-32 32s-32-14.3-32-32l0-30.1-15 15c-9.4 9.4-24.6 9.4-33.9 0s-9.4-24.6 0-33.9l49-49 0-70.3-61.4 35.8-17.7 66.1c-3.4 12.8-16.6 20.4-29.4 17s-20.4-16.6-17-29.4l5.2-19.3L48.1 395.6c-15.3 8.9-34.9 3.7-43.8-11.5s-3.7-34.9 11.5-43.8l25.3-14.8-21.7-5.8c-12.8-3.4-20.4-16.6-17-29.4s16.6-20.4 29.4-17l67.7 18.1L160.5 256 99.6 220.5 31.9 238.6c-12.8 3.4-26-4.2-29.4-17s4.2-26 17-29.4l21.7-5.8L15.9 171.6C.6 162.7-4.5 143.1 4.4 127.9s28.5-20.4 43.8-11.5l23.6 13.8-5.2-19.3c-3.4-12.8 4.2-26 17-29.4s26 4.2 29.4 17l17.7 66.1L192 200.3l0-70.3L143 81c-9.4-9.4-9.4-24.6 0-33.9s24.6-9.4 33.9 0l15 15L192 32c0-17.7 14.3-32 32-32z'/></svg>");
+        $(".fab4").html("<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 448 512\"><path d=\"M0 96C0 78.3 14.3 64 32 64l384 0c17.7 0 32 14.3 32 32s-14.3 32-32 32L32 128C14.3 128 0 113.7 0 96zM0 256c0-17.7 14.3-32 32-32l384 0c17.7 0 32 14.3 32 32s-14.3 32-32 32L32 288c-17.7 0-32-14.3-32-32zM448 416c0 17.7-14.3 32-32 32L32 448c-17.7 0-32-14.3-32-32s14.3-32 32-32l384 0c17.7 0 32 14.3 32 32z\"/></svg>");
     }
 
 
@@ -411,7 +404,7 @@ export default class SquadCalc {
         const factionsDialog = document.querySelector("#factionsDialog");
         const serversInformation = document.querySelector("#serversInformation");
 
-        $(".btn-delete, .btn-download, .btn-undo, .btn-layer, #mapLayerMenu").hide();
+        $(".btn-delete, .btn-undo, .btn-layer, #mapLayerMenu").hide();
 
         this.ui = localStorage.getItem("data-ui");
 
@@ -472,20 +465,6 @@ export default class SquadCalc {
         });
 
         $(document).on("click", "#servers", () => {
-            //let button = $(e.currentTarget);
-
-            // if(button.hasClass("active")) {
-            //     button.removeClass("active");
-            //     if(this.squadServersBrowser) {
-            //         this.squadServersBrowser.selectedLayer = null;
-            //         this.squadServersBrowser.selectedServer = null;
-            //     }
-
-            //     serverBrowserTooltips.enable();
-            //     activeServerBrowserTooltips.disable();
-            //     return;
-            // }
-
             serverBrowserTooltips.disable();
             if (!this.squadServersBrowser) {
                 this.squadServersBrowser = new SquadServersBrowser();
@@ -495,8 +474,7 @@ export default class SquadCalc {
             
             // Focus search input at the end
             const searchInput = document.getElementById("serverSearch");
-            if (searchInput) searchInput.focus();
-            
+            if (searchInput) searchInput.focus(); 
         });
           
         window.addEventListener("drop", e => {
@@ -520,44 +498,33 @@ export default class SquadCalc {
 
                     $(".dropbtn").val(data.activeMap).trigger($.Event("change", { broadcast: true }));
 
-                    $(document).one("heightmap:loaded", () => {
-                        try {
+                    data.markers.forEach(marker => { this.minimap.createMarker(new LatLng(marker.lat, marker.lng), marker.team, marker.category, marker.icon, marker.uid); });
+                    data.arrows.forEach(arrow => { new MapArrow(this.minimap, arrow.color, arrow.latlngs[0], arrow.latlngs[1], arrow.uid); });
+                    data.circles.forEach(circle => { new MapCircle(this.minimap, circle.color, circle.latlng, circle.radius, circle.uid); });
+                    data.rectangles.forEach(rectangle => { new MapRectangle(this.minimap, rectangle.color, rectangle.bounds._southWest, rectangle.bounds._northEast, rectangle.uid); });
+                    data.draws.forEach(draw => { new MapDrawing(this.minimap, draw.color, draw.latlngs, draw.uid).finalize(false); });
 
-                            // Make sure there is weapons before trying to create targets
-                            if (Array.isArray(data.weapons) && data.weapons.length > 0) {
-                                data.weapons.forEach(weapon => {
-                                    this.minimap.createWeapon(new LatLng(weapon.lat, weapon.lng));        
-                                });
-                                data.targets.forEach(target => {
-                                    this.minimap.createTarget(new LatLng(target.lat, target.lng), false);
-                                });
-                            }
-                            this.openToast("success", "importSuccess", "");
-                        
-                        } catch (err) {
-                            console.debug("Error while creating markers:", err);
-                            this.openToast("error", "fileNotSupported", "openIssue");
+                    // Wait for the heightmap to load before adding weapons/targets
+                    $(document).one("heightmap:loaded", () => {
+                        if (Array.isArray(data.weapons) && data.weapons.length > 0) {
+                            data.weapons.forEach(weapon => { this.minimap.createWeapon(new LatLng(weapon.lat, weapon.lng)); });
+                            data.targets.forEach(target => { this.minimap.createTarget(new LatLng(target.lat, target.lng), false); });
                         }
+                        this.openToast("success", "importSuccess", "");
                     });
 
                     $(document).one("layers:loaded", () => {
                         this.LAYER_SELECTOR.val(data.activeLayer).trigger($.Event("change", { broadcast: true }));
                         $(document).one("layer:loaded", () => {
-
-                            data.markers.forEach(marker => {
-                                this.minimap.createMarker(new LatLng(marker.lat, marker.lng), marker.team, marker.category, marker.icon, marker.uid);
-                            });
-
+                            // Select Flags
                             data.selectedFlags.forEach(flag => {
                                 this.minimap.layer.flags.forEach((layerFlag) => {
-                                    if (layerFlag.objectName === flag) {
-                                        if (layerFlag.isSelected) return;
-                                        this.minimap.layer._handleFlagClick(layerFlag);
-                                        return;
-                                    }
+                                    if (layerFlag.objectName != flag) return;
+                                    if (layerFlag.isSelected) return;
+                                    this.minimap.layer._handleFlagClick(layerFlag);
+                                    return;
                                 });
                             });
-
                             // Load Factions and Units
                             this.FACTION1_SELECTOR.val(data.teams[0][0]).trigger($.Event("change", { broadcast: false }));
                             this.FACTION2_SELECTOR.val(data.teams[1][0]).trigger($.Event("change", { broadcast: false }));
@@ -581,27 +548,14 @@ export default class SquadCalc {
             this.minimap.deleteArrows();
             this.minimap.deleteRectangles();
             this.minimap.deleteCircles();
+            this.minimap.deletePolylines();
         });
 
-        $(".btn-download").on("click", () => {
-            this.saveMapStateToFile();
-        });
-
-        $(".btn-undo").on("click", () => {
-            if (this.minimap.history.length > 0) this.minimap.history.at(-1).delete();
-        });
-
-        $(".btn-layer").on("click", () => {
-            this.minimap.layer.toggleVisibility();
-        });
-
-        $("#fabCheckbox3").on("change", () => {
-            const newUrl = window.location.href.replace("squadcalc", "squadtactics").replace("3000", "4000");
-            window.open(newUrl, "_blank", "noopener");
-        });
-
+        $(".btn-download").on("click", () => { this.saveMapStateToFile(); });
+        $(".btn-undo").on("click", () => { if (this.minimap.history.length > 0) this.minimap.history.at(-1).delete(); });
+        $(".btn-layer").on("click", () => { this.minimap.layer.toggleVisibility(); });
+        $(".btn-drawingMode").on("click", () => { this.minimap.disableDrawingMode(); });
         $("#fabCheckbox2").on("change", () => { this.switchUI();});
-
         $("#factionsButton").on("click", () => { $("#factionsDialog")[0].showModal(); });
         
         $("#mapLayerMenu").find("button.btn-session").on("click", () => {
@@ -627,6 +581,14 @@ export default class SquadCalc {
                 leaveSessionTooltips.enable();
             }
         });
+
+
+        // $("#btn-map-choices").on("hover", () => {
+        //     $("button.layers").show();
+        //     console.log("Map Layers Menu opened");
+        // });
+
+        // $("button.layers").hide();
 
         $("#mapLayerMenu").find("button.layers").on("click", (event) => {
 
@@ -686,7 +648,6 @@ export default class SquadCalc {
                 this.openToast("success", "focusMode", "enterToExit");
             });
 
-
             $(document).on("keydown", (event) => {
 
                 // Disable Shortkeys in legacy mode
@@ -725,8 +686,9 @@ export default class SquadCalc {
                     }
                 }
 
-                // BACKSPACE = REMOVE LAST CREATED TARGET MARKER
-                if (event.key === "Backspace") {
+                // BACKSPACE / CTRL+Z = REMOVE LAST CREATED TARGET MARKER
+                if (event.key === "Backspace" ||(event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "z") {
+                    event.preventDefault();
                     if (this.minimap.history.length > 0) this.minimap.history.at(-1).delete();
                 }
 
@@ -735,6 +697,9 @@ export default class SquadCalc {
                     event.preventDefault();
                     if (this.minimap.hasMarkers()) this.saveMapStateToFile();
                 }
+
+                // ESCAPE = QUIT DRAWING MODE
+                if (event.key === "Escape") { this.minimap.disableDrawingMode(); }
 
             });
 
@@ -797,7 +762,6 @@ export default class SquadCalc {
                 navigator.clipboard.writeText(newUrl);
                 this.openToast("success", "copied", "");
             }
-
         });
       
         weaponInformation.addEventListener("close", function(){
@@ -885,9 +849,9 @@ export default class SquadCalc {
         const newSvg = $("<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 576 512'><path d='M384 476.1L192 421.2l0-385.3L384 90.8l0 385.3zm32-1.2l0-386.5L543.1 37.5c15.8-6.3 32.9 5.3 32.9 22.3l0 334.8c0 9.8-6 18.6-15.1 22.3L416 474.8zM15.1 95.1L160 37.2l0 386.5L32.9 474.5C17.1 480.8 0 469.2 0 452.2L0 117.4c0-9.8 6-18.6 15.1-22.3z'/></svg>");
         $(".fab1").empty().append(newSvg);
 
-        if (this.ui == 0){
+        if (this.ui == 0) {
             this.loadMapUIMode();
-            if (this.minimap.hasMarkers()) $(".btn-delete, .btn-undo, .btn-download").show();
+            if (this.minimap.hasMarkers()) $(".btn-delete, .btn-undo").show();
             return;
         }
 
@@ -933,18 +897,28 @@ export default class SquadCalc {
      */
     changeWeapon() {
         const WEAPON = this.WEAPON_SELECTOR.val();
-    
-        //this.line.hide("none");
+
         localStorage.setItem("data-weapon", WEAPON);
         this.activeWeapon = WEAPONS[WEAPON];
     
-        if (WEAPON == 6) {
+        if (this.activeWeapon.shells.length > 1) {
             $("#ammoSelector").show();
-            this.activeWeapon.changeShell();
         } else {
             $("#ammoSelector").hide();
         }
-        $("#mortarImg").attr("src", `/img/weapons/${this.activeWeapon.name}.png`);
+
+        // Load SHELL_SELECTOR with weapon.shells
+        this.SHELL_SELECTOR.empty();    
+        this.activeWeapon.shells.forEach((shell, index) => {
+            this.SHELL_SELECTOR.append(`
+                <option data-i18n=weapons:${shell.name} value=${index}>
+                    ${i18next.t("weapons:" + shell.name)}
+                </option>`
+            );
+        });
+        this.SHELL_SELECTOR.val(0).trigger("change");
+
+        $("#mortarImg").attr("src", `/img/weapons/${this.activeWeapon.name}.webp`);
         
         this.shoot();
     
@@ -1042,16 +1016,9 @@ export default class SquadCalc {
         animateCalc(bearing.toFixed(1), 500, "bearingNum");
         animateCalc(elevation.toFixed(this.activeWeapon.elevationPrecision), 500, "elevationNum");
 
-        if (this.activeWeapon.getAngleType() === -1) {
-            $("#highlowicon").css({ transform: "rotate(0deg)"});
-        }
-        else {
-            $("#highlowicon").css({transform: "rotate(180deg)"});
-        }
-
-        if (this.activeWeapon.name != "Mortar" && this.activeWeapon.name != "UB-32") {
-            $("#highlow").addClass("active");
-        }
+        if (this.activeWeapon.name != "Mortar" && this.activeWeapon.name != "UB-32") $("#highlow").addClass("active");
+        if (this.activeWeapon.getAngleType() === -1) $("#highlowicon").css({ transform: "rotate(0deg)"});
+        else $("#highlowicon").css({transform: "rotate(180deg)"});
 
         // show actions button
         $("#savebutton").removeClass("hidden");
@@ -1086,13 +1053,9 @@ export default class SquadCalc {
      */
     showError(msg, issue) {
 
-        if (issue === "mortar") {
-            $("#mortar-location").addClass("error2");
-        } else if (issue === "target") {
-            $("#target-location").addClass("error2");
-        } else {
-            $("#target-location, #mortar-location").addClass("error2");
-        }
+        if (issue === "mortar") $("#mortar-location").addClass("error2");
+        else if (issue === "target") $("#target-location").addClass("error2");
+        else $("#target-location, #mortar-location").addClass("error2");
 
         // Rework the #setting div to display a single message
         $("#bearing").addClass("hidden").removeClass("pure-u-10-24");
@@ -1134,11 +1097,8 @@ export default class SquadCalc {
     copySave(COPY_ZONE) {
         let text2copy;
 
-        if (COPY_ZONE.prev().val().length === 0) {
-            text2copy = COPY_ZONE.prev().attr("placeholder").trim() + COPY_ZONE.text().trim();
-        } else {
-            text2copy = COPY_ZONE.prev().val().trim() + COPY_ZONE.text().trim();
-        }
+        if (COPY_ZONE.prev().val().length === 0) text2copy = COPY_ZONE.prev().attr("placeholder").trim() + COPY_ZONE.text().trim();
+        else text2copy = COPY_ZONE.prev().val().trim() + COPY_ZONE.text().trim();
 
         navigator.clipboard.writeText(text2copy);
         animateCSS(COPY_ZONE.parent(), "headShake");
@@ -1199,20 +1159,11 @@ export default class SquadCalc {
         // Otherwise we guess if the user is deleting or adding something
         // and ajust the cursor considering MSMC added/removed a '-'
 
-        if (startA >= 3) {
-            startA += (a > MORTAR_LENGTH) ? -1 : 1;
-        }
+        if (startA >= 3) startA += (a > MORTAR_LENGTH) ? -1 : 1;
+        if (startB >= 3) startB += (b > TARGET_LENGTH) ? -1 : 1;
         
-        if (startB >= 3) {
-            startB += (b > TARGET_LENGTH) ? -1 : 1;
-        }
-        
-        if (inputChanged === "weapon") {
-            MORTAR_LOC[0].setSelectionRange(startA, startA);
-        }
-        else if (inputChanged === "target"){
-            TARGET_LOC[0].setSelectionRange(startB, startB);
-        }
+        if (inputChanged === "weapon") MORTAR_LOC[0].setSelectionRange(startA, startA);
+        else if (inputChanged === "target") TARGET_LOC[0].setSelectionRange(startB, startB);
         else {
             MORTAR_LOC[0].setSelectionRange(startA, startA);
             TARGET_LOC[0].setSelectionRange(startB, startB);
@@ -1235,11 +1186,7 @@ export default class SquadCalc {
      * Resize every saved name
      */
     resizeInputsOnResize() {
-
-        $(".saved_list :input").each((index, element) => {
-            this.resizeInput($(element)[0]);
-        });
-
+        $(".saved_list :input").each((_, element) => { this.resizeInput($(element)[0]); });
     }
 
 
@@ -1278,12 +1225,10 @@ export default class SquadCalc {
     copyCalc(event) {
         
         // If calcs aren't ready, do nothing
-        if (!$(".copy").hasClass("copy")) { return 1; }
+        if (!$(".copy").hasClass("copy")) return 1;
 
         if (event.target.id === "highlowicon" || event.target.id === "highlow") {
-            if ($("#highlow").hasClass("active")) {
-                this.changeHighLow();
-            }
+            if ($("#highlow").hasClass("active")) this.changeHighLow();
             return 1;
         }
 
@@ -1298,11 +1243,8 @@ export default class SquadCalc {
      */
     changeHighLow(){
         const transformValue = $("#highlowicon").css("transform");
-        if (transformValue === "none" || transformValue === "matrix(1, 0, 0, 1, 0, 0)") {
-            this.activeWeapon.angleType = "low";
-        } else {
-            this.activeWeapon.angleType = "high";
-        }
+        if (transformValue === "none" || transformValue === "matrix(1, 0, 0, 1, 0, 0)") this.activeWeapon.angleType = "low";
+        else this.activeWeapon.angleType = "high";
         this.shoot();
     }
 
@@ -1335,9 +1277,7 @@ export default class SquadCalc {
             } else {
                 // opposite of calculations in getKP()
                 const SUB = Number(PARTS[i]);
-                if (Number.isNaN(SUB)) {
-                    console.debug(`invalid keypad string: ${FORMATTED_KEYPAD}`);
-                }
+                if (Number.isNaN(SUB)) console.debug(`invalid keypad string: ${FORMATTED_KEYPAD}`);
                 const subX = (SUB - 1) % 3;
                 const subY = 2 - (Math.ceil(SUB / 3) - 1);
 
@@ -1363,6 +1303,7 @@ export default class SquadCalc {
         const arrows = [];
         const circles = [];
         const rectangles = [];
+        const draws = [];
         const hexs = [];
         const activeWeapon = this.WEAPON_SELECTOR.val();
         const activeMap = this.MAP_SELECTOR.val();
@@ -1374,66 +1315,36 @@ export default class SquadCalc {
         const version = this.version;
     
         this.minimap.activeWeaponsMarkers.eachLayer(weapon => {
-            weapons.push({
-                lat: weapon._latlng.lat,
-                lng: weapon._latlng.lng,
-                heightPadding: weapon.heightPadding,
-                uid: weapon.uid
-            });
+            weapons.push({ lat: weapon._latlng.lat, lng: weapon._latlng.lng, heightPadding: weapon.heightPadding, uid: weapon.uid });
         });
         this.minimap.activeTargetsMarkers.eachLayer(target => {
-            targets.push({
-                lat: target._latlng.lat,
-                lng: target._latlng.lng,
-                uid: target.uid
-            });
+            targets.push({ lat: target._latlng.lat, lng: target._latlng.lng, uid: target.uid });
         });
         this.minimap.activeMarkers.eachLayer(marker => {
-            markers.push({
-                lat: marker._latlng.lat,
-                lng: marker._latlng.lng,
-                uid: marker.uid,
-                team: marker.team,
-                category: marker.category,
-                icon: marker.icontype
-            });
+            markers.push({ lat: marker._latlng.lat, lng: marker._latlng.lng, uid: marker.uid, team: marker.team, category: marker.category, icon: marker.icontype });
         });
         this.minimap.activeArrows.forEach(arrow => {
-            arrows.push({
-                uid: arrow.uid,
-                latlngs: arrow.polyline.getLatLngs(),
-                color: arrow.color,
-            });
+            arrows.push({ uid: arrow.uid, latlngs: arrow.polyline.getLatLngs(), color: arrow.color, });
         });
         this.minimap.activeCircles.forEach(circle => {
-            circles.push({
-                uid: circle.uid,
-                latlng: circle.circle.getLatLng(),
-                color: circle.color,
-                radius: circle.circle.getRadius(),
-            });
+            circles.push({ uid: circle.uid, latlng: circle.circle.getLatLng(), color: circle.color, radius: circle.circle.getRadius(), });
         });
         this.minimap.activeRectangles.forEach(rectangle => {
-            rectangles.push({
-                uid: rectangle.uid,
-                color: rectangle.color,
-                bounds: rectangle.rectangle.getBounds(),
-            });
+            rectangles.push({ uid: rectangle.uid, color: rectangle.color, bounds: rectangle.rectangle.getBounds(), });
+        });
+        this.minimap.activePolylines.forEach(polyline => {
+            draws.push({ uid: polyline.uid, color: polyline.color, bounds: polyline.polyline.getBounds(), latlngs: polyline.polyline.getLatLngs(), });
         });
 
         if (this.minimap.layer) {
-            this.minimap.layer.selectedFlags.forEach(flag => {
-                selectedFlags.push(flag.objectName);
-            });
+            this.minimap.layer.selectedFlags.forEach(flag => { selectedFlags.push(flag.objectName); });
             this.minimap.layer.hexs.forEach((hex) => {
-                hexs.push({
-                    number: hex._hexNumber,
-                    colorIndex: hex._colorIndex,
-                });
+                hexs.push({ number: hex._hexNumber, colorIndex: hex._colorIndex, });
             });
         }
 
-        return { hexs, weapons, targets, markers, arrows, circles, rectangles, activeWeapon, activeMap, activeLayer, selectedFlags, teams, version };
+        
+        return { hexs, weapons, targets, markers, arrows, circles, rectangles, draws, activeWeapon, activeMap, activeLayer, selectedFlags, teams, version };
     }
 
     saveMapStateToFile() {
