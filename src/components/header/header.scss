@@ -148,3 +148,11 @@ header {
     float: left;
     margin-right: 0;
 }
+
+// KrestGG logo responsiveness
+.krestgg-logo-link {
+    // Hide on mobile to prevent overlap with menu
+    @media screen and (width <= 48em) {
+        display: none !important;
+    }
+}

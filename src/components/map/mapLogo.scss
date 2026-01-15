@@ -43,3 +43,21 @@
     z-index: 99;
     top: 0;
 }
+
+#loaderCrosses {
+    position: absolute;
+    top: 28%;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1;
+
+    img {
+        height: 90px;
+        display: block;
+        margin: 0 auto;
+    }
+
+    @media screen and (width >= 48em) {
+        top: 32%;
+    }
+}
