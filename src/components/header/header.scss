@@ -149,9 +149,19 @@ header {
     margin-right: 0;
 }
 
-// KrestGG logo responsiveness
+// KrestGG logo
 .krestgg-logo-link {
-    // Hide on mobile to prevent overlap with menu
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    padding-top: 0.5em;
+    z-index: 1;
+
+    img {
+        height: 50px;
+        display: block;
+    }
+
     @media screen and (width <= 48em) {
         display: none !important;
     }
