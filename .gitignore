@@ -11,3 +11,4 @@ config/test-results/
 maintenance.enable
 /.fastRequest
 .worktrees/
+.claude/
