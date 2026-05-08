@@ -1189,6 +1189,11 @@ export default class SquadCalc {
             const logo = document.getElementById("loaderLogo");
             logo.classList.remove("logo-stamp");
             logo.classList.add("logo-stamp-out");
+            const crosses = document.getElementById("loaderCrosses");
+            if (crosses) {
+                crosses.classList.remove("crosses-stamp");
+                crosses.classList.add("crosses-stamp-out");
+            }
             $("#loader").fadeOut(500);
         }, 1800);
     }
