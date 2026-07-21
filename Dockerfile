@@ -2,7 +2,7 @@
 FROM node:22-alpine AS builder
 WORKDIR /app
 
-ARG API_URL=https://calc.krestgg.ru/api
+ARG API_URL=https://calc.krest.gg/api
 ARG SEARCH_ENGINES=false
 ARG SMO_WEBSOCKET=false
 
