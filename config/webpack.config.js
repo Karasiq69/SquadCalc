@@ -53,6 +53,7 @@ export default async (env) => {
                     use: { loader: 'html-loader', options: { interpolate: true } }
                 },
                 { test: /\.(png|svg|jpg|jpeg|gif|webp)$/i, type: 'asset/resource', },
+                { test: /\.md$/, type: 'asset/source' },
             ],
         },
         infrastructureLogging: { level: 'none'},
@@ -66,7 +67,13 @@ export default async (env) => {
                 directory: path.join(__dirname, '../public'),
                 publicPath: '/',
             },
-            client: { webSocketURL: 'ws://0.0.0.0:80/ws' }
+            client: { webSocketURL: 'ws://0.0.0.0:80/ws' },
+            proxy: [{
+                context: ["/krest-api"],
+                target: "https://endback.krest.gg",
+                pathRewrite: { "^/krest-api": "/api" },
+                changeOrigin: true,
+            }],
         },
         plugins: [
             new Dotenv(),

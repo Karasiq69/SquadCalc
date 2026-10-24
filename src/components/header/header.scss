@@ -17,6 +17,10 @@ header {
     &.ui {
         position: fixed;
     }
+    // Stay on top of the 3D view (#threeDView, z-index 3) so the map/layer/etc selectors remain usable
+    .threeD-open & {
+        z-index: 4;
+    }
     .weaponSelector {
         z-index: 4;
         padding-top: 1em;
@@ -31,7 +35,7 @@ header {
         }
         #weaponSelector {
             .select2-results__options {
-                max-height: 350px; 
+                max-height: 400px;
             }
         } 
         .select2-results__group {
@@ -46,6 +50,13 @@ header {
             padding-top: 1em;
         }
     }
+    // Chromium clips backdrop-filter at any ancestor holding a filled (fill-mode)
+    // opacity animation, killing the select2 dropdown blur. fadeIn ends at the
+    // natural opacity anyway, so drop the fill and let the animation be discarded.
+    .mapSelector .dropdown,
+    .weaponSelector {
+        animation-fill-mode: none;
+    }
     .mapSelector {
         padding-top: 1em;
         z-index: 5;
@@ -55,6 +66,32 @@ header {
             background-color: transparent;
             .select2-selection__rendered {
                 background-color: transparent;
+            }
+        }
+        #krestServers {
+            display: flex;
+            gap: 4px;
+            width: 250px;
+            padding-bottom: 1em;
+            animation-fill-mode: none;
+            button {
+                flex: 1;
+                pointer-events: all;
+                cursor: pointer;
+                color: #fff;
+                font-family: inherit;
+                font-size: 0.75em;
+                font-weight: bold;
+                line-height: 2.2em;
+                background: rgba(0, 0, 0, 0.8);
+                backdrop-filter: blur(8px);
+                -webkit-backdrop-filter: blur(8px);
+                border: none;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+                transition: background-color 0.2s ease;
+                &:hover {
+                    background-color: variables.$mainColor;
+                }
             }
         }
         #serverSelector {
@@ -89,6 +126,14 @@ header {
                 font-size: 0.9em;
                 max-height: 400px;
             }
+            .select2-results__group {
+                color: rgba(255, 255, 255, .7);
+                padding-top: 10px;
+                font-weight: 900;
+                text-align: left;
+                padding-left: 15px;
+                font-size: 1em;
+            }
         }
         #layerSelector {
             z-index: 2;
@@ -96,7 +141,15 @@ header {
             position: relative;
             .select2-results__options {
                 font-size: 0.9em;
-                max-height: 400px;
+                max-height: 300px;
+            }
+            .select2-results__group {
+                color: rgba(255, 255, 255, .7);
+                padding-top: 10px;
+                font-weight: 900;
+                text-align: left;
+                padding-left: 15px;
+                font-size: 1em;
             }
         }
     }
@@ -166,6 +219,13 @@ header {
     span.select2-selection.select2-selection--single {
         outline: none;
     }
+    // Seasonal font on the map/layer/server/weapon dropdowns (selected value + list)
+    .mapSelector .select2-selection__rendered,
+    .mapSelector .select2-results__option,
+    #weaponSelector .select2-selection__rendered,
+    #weaponSelector .select2-results__option {
+        @include variables.theme-font(variables.$mainFont);
+    }
 }
 
 .select2-dropdown {
@@ -179,7 +239,7 @@ header {
 }
 
 .select2-dropdown--below {
-    animation: select2SlideDown 0.15s ease;
+    animation: select2-slide-down 0.15s ease;
 }
 
 .select2-dropdown--above {
@@ -202,6 +262,17 @@ header {
     to { 
         opacity: 1;
     }
+}
+
+
+// Our custom `.select2-results__options { max-height: … }` rules above
+// unintentionally also match select2's nested per-optgroup `<ul>`
+// (`.select2-results__options--nested`), capping its height with no
+// overflow rule set. The overflow then spills visibly onto the next
+// group below. Only the top-level list should ever be height-capped.
+
+.select2-results__options--nested {
+    max-height: none !important;
 }
 
 .select2-results__option {
