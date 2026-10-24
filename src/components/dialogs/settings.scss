@@ -2,7 +2,7 @@
 
 #helpDialog {
     width: 94%;
-    height: 525px;
+    height: 650px;
     max-width: 600px;
     font-size: 0.6em;
     font-weight: bold;
@@ -69,7 +69,7 @@
                 color: variables.$mainTxtColor;
                 opacity: 0.5;
                 padding-bottom: 10px;
-                font-weight: normal;
+                font-weight: bold;
                 text-transform: uppercase;
                 letter-spacing: 1px;
                 text-align: left;
@@ -134,6 +134,15 @@
                 text-shadow: 0 0 4px #ffffff75;
             }
         }
+        .themeFontSettings {
+            // Always default font, even with the seasonal theme font on
+            --main-font: montserrat;
+            font-family: montserrat, Times, "Times New Roman", serif;
+            font-synthesis: initial;
+            .toggleCheckbox {
+                color: variables.$mainColor;
+            }
+        }
         caption {
             margin: 0 0 10px;
             color: variables.$mainTxtColor;
@@ -154,8 +163,12 @@
                 border: none;
                 padding: 0 0.4em;
             }
-            a {
+            a, button {
                 margin: 0;
+                background: none;
+                border: none;
+                padding: 0;
+                cursor: pointer;
             }
             svg {
                 height: 1.1em;
@@ -190,6 +203,53 @@
             &.error {
                 color: variables.$mainColor;
                 opacity: 1;
+            }
+        }
+    }
+    #mapBtnToggles {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px;
+        .mapBtnToggle {
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(17, 17, 17, 0.75);
+            border: rgba(255, 255, 255, 0.08) solid 1px;
+            border-radius: 3px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            color: #ccc;
+            svg {
+                height: 1.3em;
+                fill: #fff;
+                pointer-events: none;
+            }
+            &.mapBtnToggle-3d {
+                color: #fff;
+                font-size: 0.85em;
+                font-weight: 700;
+                letter-spacing: 0.02em;
+            }
+            &.active {
+                background-color: variables.$mainColor;
+                border-color: variables.$mainColor;
+            }
+            &:not(.active) {
+                opacity: 0.3;
+                filter: grayscale(1);
+            }
+            &:focus {
+                outline: none;
+            }
+
+            @media (hover: hover) {
+                &:hover {
+                    opacity: 1;
+                    filter: none;
+                }
             }
         }
     }
@@ -239,9 +299,14 @@
                             }
                         }           
                         input[type="range"] {
+                            // Chrome ignores ::-webkit-slider-thumb styling
+                            // unless the input itself drops native appearance
+                            -webkit-appearance: none;
+                            appearance: none;
                             width: 100%;
                             height: 2px;
                             border-radius: 1px;
+                            background: rgba(255, 255, 255, 0.25);
                             outline: none;
                             position: relative;
                             z-index: 1;
@@ -309,7 +374,7 @@ $bezier: cubic-bezier(0.65, 0.25, 0.56, 0.96);
         height: 1px;
         width: 1px;
         overflow: hidden;
-        clip: rect(1px, 1px, 1px, 1px);
+        clip-path: inset(50%);
     }
     input[type="checkbox"] + span,
     input[type="radio"] + span {
@@ -371,6 +436,74 @@ $bezier: cubic-bezier(0.65, 0.25, 0.56, 0.96);
     }
 }
 
+#modsPanelContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 0.95em;
+    padding: 0.4em 1.5em 0.2em;
+    .modToggleTile {
+        display: flex;
+        flex-direction: column;
+        gap: 0.3em;
+        width: 100%;
+        min-height: 4.6em;
+        position: relative;
+        color: variables.$mainTxtColor;
+        background-color: #000;
+        border: 1px solid #555;
+        border-radius: 4px;
+        padding: 0.85em 1.2em;
+        font-size: 1.08em;
+        font-weight: bold;
+        text-align: left;
+        cursor: pointer;
+        overflow: hidden;
+        transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+        // Hover effect only for devices that support true hover (desktop)
+        @media (hover: hover) {
+            &:hover:not(.locked) {
+                border-color: variables.$mainColor;
+                background-color: rgba(variables.$mainColor, 0.12);
+            }
+        }
+        .modTileLogo {
+            position: absolute;
+            top: 0;
+            right: 0;
+            height: 100%;
+            width: 4.6em;
+            border-radius: 0 3px 3px 0;
+            object-fit: cover;
+        }
+        .modTileName {
+            font-size: 1em;
+            padding-right: 4.3em;
+        }
+        .modTileStats {
+            display: flex;
+            align-items: center;
+            gap: 0.55em;
+            font-size: 0.82em;
+            font-weight: bold;
+            opacity: 0.7;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            .modTileStatsSeparator {
+                opacity: 0.5;
+            }
+        }
+        &.active {
+            background-color: variables.$mainColor;
+            border-color: variables.$mainColor;
+            color: variables.$mainTxtColor;
+        }
+        &.locked {
+            cursor: not-allowed;
+            opacity: 0.85;
+        }
+    }
+}
+
 #settingsControls {
     margin: 0 0 1.3em;
     text-align: center;
@@ -378,11 +511,12 @@ $bezier: cubic-bezier(0.65, 0.25, 0.56, 0.96);
     button {
         color: variables.$mainBGColor;
         background-color: white;
-        width: 20%;
+        width: 17%;
         margin-bottom: 1em;
         vertical-align: middle;
         height: 18px;
         cursor: pointer;
+        font-weight: bold;
         transition: background-color 0.3s ease, width 0.3s ease;
         span {
             vertical-align: middle;
@@ -396,7 +530,7 @@ $bezier: cubic-bezier(0.65, 0.25, 0.56, 0.96);
             color: variables.$mainTxtColor;
             padding-bottom: 0;
             height: 25px;
-            width: 28%;
+            width: 22%;
             svg {
                 display: inline-block;
                 fill: variables.$mainTxtColor;
@@ -426,7 +560,6 @@ $bezier: cubic-bezier(0.65, 0.25, 0.56, 0.96);
     color: variables.$mainTxtColor;
     border: 1px solid #444;
     border-radius: 6px;
-
     .capture-title {
         font-size: 1.3em;
         margin: 0 0 1.2em;
@@ -435,19 +568,16 @@ $bezier: cubic-bezier(0.65, 0.25, 0.56, 0.96);
         text-transform: uppercase;
         letter-spacing: 1px;
     }
-
     .capture-key-display {
         min-height: 3em;
         display: flex;
         align-items: center;
         justify-content: center;
         margin-bottom: 0.8em;
-
         .capture-listening {
             opacity: 0.4;
             font-size: 1.1em;
         }
-
         .capture-preview {
             font-size: 1.1em;
             kbd {
@@ -463,19 +593,16 @@ $bezier: cubic-bezier(0.65, 0.25, 0.56, 0.96);
             }
         }
     }
-
     .capture-conflict {
         min-height: 1.4em;
         font-size: 0.95em;
         color: variables.$mainColor;
         margin: 0 0 1em;
     }
-
     .capture-buttons {
         display: flex;
         gap: 0.6em;
         justify-content: center;
-
         button {
             padding: 6px 14px;
             cursor: pointer;

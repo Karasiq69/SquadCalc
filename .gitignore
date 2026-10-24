@@ -12,3 +12,5 @@ maintenance.enable
 /.fastRequest
 .worktrees/
 .claude/
+.agents/
+skills-lock.json

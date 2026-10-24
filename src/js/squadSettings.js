@@ -31,6 +31,8 @@ export default class SquadSettings {
         this.bindCheckboxes();
         this.bindSliders();
         this.bindLabelClicks();
+        this.loadButtonToggles();
+        this.bindButtonToggles();
         this.bindMenuButtons();
         this.applyInitialState();
         $("#appVersion").text(`SquadCalc v${packageInfo.version}`);
@@ -65,6 +67,14 @@ export default class SquadSettings {
                 requiresMouse: true,
                 onChange: () => {
                     $("body").toggleClass("map-crosshair", !this.cursor);
+                }
+            },
+            disableThemeFont: {
+                key: "settings-disable-theme-font",
+                default: false,
+                selector: "#themeFontSettings",
+                onChange: () => {
+                    $("body").toggleClass("no-theme-font", this.disableThemeFont);
                 }
             },
 
@@ -120,14 +130,6 @@ export default class SquadSettings {
                 selector: "#realMaxRangeSettings",
                 onChange: () => this.app.minimap.updateWeapons()
             },
-            experimentalWeapons: {
-                key: "settings-experimental-weapons",
-                default: false,
-                selector: "#experimentalSetting",
-                onChange: () => this.app.toggleExperimentalWeapons()
-            },
-
-
             // Calculation Display
             lowAndHigh: {
                 key: "settings-low-high",
@@ -303,7 +305,7 @@ export default class SquadSettings {
                     if (this.app.minimap.layer) {
                         if (val) {
                             this.app.minimap.layer.flags.forEach(flag => {
-                                if (flag.isNext) flag.showPercentage();
+                                if (flag.percentageBreakdown?.length) flag.showPercentage();
                             });
                         } else {
                             this.app.minimap.layer.flags.forEach(flag => {
@@ -642,6 +644,9 @@ export default class SquadSettings {
         // Apply cursor setting
         $("body").toggleClass("map-crosshair", !this.cursor);
 
+        // Apply seasonal theme font setting
+        $("body").toggleClass("no-theme-font", this.disableThemeFont);
+
         // Handle faction-dependent settings
         if (!this.enableFactions) {
             $("#hideLowRespawnSettings").prop("disabled", true);
@@ -666,6 +671,94 @@ export default class SquadSettings {
         const brightness = this.brightness * 100;
         const contrast = this.contrast * 100;
         $("#map").css("filter", `brightness(${brightness}%) contrast(${contrast}%)`);
+    }
+
+    getButtonToggleDefinitions() {
+        return [
+            { key: "settings-btn-layers",  sharedContainer: "#mapBtnLayers",  buttons: ".btn-topomap, .btn-terrainmap, .btn-basemap", default: true },
+            { key: "settings-btn-hd",      sharedContainer: null,             buttons: ".btn-hd",                                   default: true },
+            { key: "settings-btn-3d",      sharedContainer: null,             buttons: ".btn-3d",                                   default: true },
+            { key: "settings-btn-layer-info", sharedContainer: "#mapBtnMain", buttons: ".btn-layer-info",                           default: true },
+            { key: "settings-btn-legacy",  sharedContainer: "#mapBtnMain",    buttons: ".btn-legacy",                                default: false },
+            { key: "settings-btn-helpmap", sharedContainer: "#mapBtnMain",    buttons: ".btn-helpmap",                               default: false },
+            { key: "settings-btn-focus",   sharedContainer: "#mapBtnMain",    buttons: ".btn-focus",                                 default: false },
+            { key: "settings-btn-servers", sharedContainer: "#mapBtnServers", buttons: "#servers",                                  default: true },
+            { key: "settings-btn-session", sharedContainer: "#mapBtnServers", buttons: "#sessionGroup",                             default: true },
+            { key: "settings-btn-undo",        sharedContainer: "#mapBtnActions",     buttons: ".btn-undo",         default: true },
+            { key: "settings-btn-delete",      sharedContainer: "#mapBtnActions",     buttons: ".btn-delete",       default: true },
+            { key: "settings-btn-download",    sharedContainer: "#mapBtnMain",        buttons: ".btn-download",     default: false },
+            { key: "settings-btn-upload",      sharedContainer: "#mapBtnMain",        buttons: ".btn-upload",       default: false },
+        ];
+    }
+
+    _updateSharedContainer(containerSelector) {
+        if (!containerSelector) return;
+        const defs = this.getButtonToggleDefinitions().filter(d => d.sharedContainer === containerSelector);
+        const anyVisible = defs.some(d => !$(d.buttons).data("placeholder"));
+        $(containerSelector).toggle(anyVisible);
+    }
+
+    _updateDotsButton() {
+        const anyDemoted = this.getButtonToggleDefinitions().some(d =>
+            $(d.buttons).data("placeholder")
+        );
+        $("#mapBtnTools").toggle(anyDemoted);
+    }
+
+    _moveButtonsToMenu(def) {
+        const $dotsGroup = $("#mapBtnTools .btnLayersGroup");
+        $(def.buttons).each((_, el) => {
+            const $el = $(el);
+            const $placeholder = $("<span class=\"btn-placeholder\"></span>");
+            $el.before($placeholder);
+            $el.data("placeholder", $placeholder);
+            $dotsGroup.append($el);
+        });
+        this._updateSharedContainer(def.sharedContainer);
+        this._updateDotsButton();
+    }
+
+    _restoreButtons(def) {
+        $(def.buttons).each((_, el) => {
+            const $el = $(el);
+            const $placeholder = $el.data("placeholder");
+            if ($placeholder && $placeholder.length) {
+                $placeholder.before($el);
+                $placeholder.remove();
+            }
+            $el.removeData("placeholder");
+        });
+        this._updateSharedContainer(def.sharedContainer);
+        this._updateDotsButton();
+    }
+
+    loadButtonToggles() {
+        this.getButtonToggleDefinitions().forEach(def => {
+            const stored = localStorage.getItem(def.key);
+            const val = stored === null ? def.default : stored === "1";
+            if (!val) this._moveButtonsToMenu(def);
+            $(`.mapBtnToggle[data-key="${def.key}"]`).toggleClass("active", val);
+        });
+        this._updateDotsButton();
+    }
+
+    bindButtonToggles() {
+        $(".mapBtnToggle").on("click", (e) => {
+            const btn = $(e.currentTarget);
+            const key = btn.data("key");
+            const def = this.getButtonToggleDefinitions().find(d => d.key === key);
+            if (!def) return;
+
+            const newVal = !btn.hasClass("active");
+            btn.toggleClass("active", newVal);
+            localStorage.setItem(key, newVal ? 1 : 0);
+
+            if (newVal) {
+                this._restoreButtons(def);
+            } else {
+                this._moveButtonsToMenu(def);
+            }
+        });
     }
 
     /**
@@ -705,5 +798,14 @@ export default class SquadSettings {
      */
     get(name) {
         return this[name];
+    }
+
+    isModEnabled(modKey) {
+        const stored = localStorage.getItem(`settings-mod-${modKey}`);
+        return stored === null ? false : stored === "1";
+    }
+
+    setModEnabled(modKey, enabled) {
+        localStorage.setItem(`settings-mod-${modKey}`, +enabled);
     }
 }

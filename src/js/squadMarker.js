@@ -4,6 +4,7 @@ import { Marker, Circle, CircleMarker, Popup, Polygon, Icon } from "leaflet";
 import i18next from "i18next";
 import { sendMarkerData } from "./squadCalcAPI.js";
 import { v4 as uuidv4 } from "uuid";
+import { animateCSS } from "./animations.js";
 
 
 /*
@@ -31,6 +32,19 @@ export const squadMarker = Marker.extend({
 
         this.on("dragstart", this._handleDragStart, this);
         this.on("dragend", this._handleDragEnd, this);
+        // Keep an open 3D view's markers/arcs/ranges in sync when moved
+        this.on("dragend", () => App.refresh3DOverlays());
+    },
+
+    // Placed/removed: hooked here rather than on "add"/"remove" events, as delete() calls off() before removing
+    onAdd: function (map) {
+        Marker.prototype.onAdd.call(this, map);
+        App.refresh3DOverlays();
+    },
+
+    onRemove: function (map) {
+        Marker.prototype.onRemove.call(this, map);
+        App.refresh3DOverlays();
     },
 
 
@@ -208,8 +222,6 @@ export const squadWeaponMarker = squadMarker.extend({
         const MAXRADIUS = App.activeWeapon.getMaxDistance() * this.map.gameToMapScale;
         const MINRADIUS = App.activeWeapon.minDistance * this.map.gameToMapScale;
 
-        console.log("App.activeWeapon.minDistance ", App.activeWeapon.minDistance);
-
         this.angleType = App.activeWeapon.angleType;
         this.minRangeMarker.setRadius(MINRADIUS);
         this.rangeMarker.setRadius(MAXRADIUS);
@@ -379,11 +391,12 @@ export const squadWeaponMarker = squadMarker.extend({
 
         // Logo
         $(".weaponIcon").first().attr("src", `/img/weapons/${App.activeWeapon.name}.webp`);
-        $(".infName").first().text(name);
+        $("#dialogWeaponTitle").text(name);
         $(".infRange").first().text(`${App.activeWeapon.minDistance + i18next.t("common:m")} - ${App.activeWeapon.maxDistance.toFixed(0) + i18next.t("common:m")}`);
         $(".infMOA").first().text(`${App.activeWeapon.moa} (${(App.activeWeapon.moa / 60).toFixed(1) + i18next.t("common:°")})`);
         $(".infMinDistance").first().text(App.activeWeapon.minDistance + i18next.t("common:m"));
         $(".infMaxDistance").first().text(App.activeWeapon.maxDistance.toFixed(1) + i18next.t("common:m"));
+        $(".infExplosionDamage").first().text(App.activeWeapon.shells[$(".dropbtn3").val() || 0].explosionDamage);
         $(".inf100damage").first().text(App.activeWeapon.hundredDamageRadius.toFixed(1) + i18next.t("common:m"));
         $(".inf25damage").first().text(App.activeWeapon.twentyFiveDamageRadius.toFixed(1) + i18next.t("common:m"));
         $(".infVelocity").first().text(`${App.activeWeapon.velocity + i18next.t("common:m")}/${i18next.t("common:s")}`);
@@ -404,9 +417,10 @@ export const squadWeaponMarker = squadMarker.extend({
             $("#angleChoiceLow").prop("checked", true);
         }
 
-        // Additional height
-        $(".heightPadding input").val(this.heightPadding);
-        
+        // Move To: load current weapon position as keypad
+        const currentLatLng = this.getLatLng();
+        $(".moveToInput").val(this.map.getKP(-currentLatLng.lat, currentLatLng.lng, 6));
+
         // Add listener that update angle/height & refresh targets
         weapon = weapon.sourceTarget;
         $("input[type=radio][name=angleChoice]").on("change", weapon, (e) => {
@@ -414,24 +428,12 @@ export const squadWeaponMarker = squadMarker.extend({
             this.map.updateTargets();
         });
 
-        $(".heightPadding input").on("change", weapon, (e) => {
-            const input = e.currentTarget;
-            const MAXHEIGHTPADDING = 300;
-            input.value = Math.max(0, Math.min(input.value, MAXHEIGHTPADDING));
-            weapon.heightPadding = parseFloat(input.value);
-            this.map.updateTargets();
-        
-            // Update the marker in the session
-            if (App.session.ws && App.session.ws.readyState === WebSocket.OPEN) {
-                App.session.ws.send(
-                    JSON.stringify({
-                        type: "MOVING_WEAPON",
-                        uid: this.uid,
-                        lat: this._latlng.lat,
-                        lng: this._latlng.lng,
-                        heightPadding: input.value,
-                    })
-                );
+        $(".moveToBtn").on("click", weapon, (e) => {
+            if (weapon.moveToKeypad($(".moveToInput").val())) {
+                const newLatLng = weapon.getLatLng();
+                $(".moveToInput").val(weapon.map.getKP(-newLatLng.lat, newLatLng.lng, 6));
+            } else {
+                animateCSS($(e.currentTarget).closest(".moveToRow"), "headShake");
             }
         });
 
@@ -484,7 +486,7 @@ export const squadWeaponMarker = squadMarker.extend({
                 );
             }
 
-            console.debug(`Sent move request for weapon ${this.uid}, new position: (${newLatLng.lat}, ${newLatLng.lng})`);
+            console.debug(`[SESSION] Sent move request for weapon ${this.uid}, new position: (${newLatLng.lat}, ${newLatLng.lng})`);
         }
         
 
@@ -511,7 +513,32 @@ export const squadWeaponMarker = squadMarker.extend({
             weapon: App.activeWeapon.name,
             map: App.minimap.activeMap.name,
         });
-        
+
+    },
+
+    /**
+     * Move the weapon to the given keypad coordinates
+     * @param {string} kp - keypad coordinates, e.g. "A02-3-5-2"
+     * @returns {boolean} true if the keypad was valid and the weapon was moved
+     */
+    moveToKeypad: function(kp) {
+        if (!kp || kp.length < 3) return false;
+
+        const pos = App.getPos(kp);
+        if (Number.isNaN(pos.lat) || Number.isNaN(pos.lng)) return false;
+
+        let latlng = { lat: -pos.lng * this.map.gameToMapScale, lng: pos.lat * this.map.gameToMapScale };
+        latlng = this.keepOnMap({ latlng }).latlng;
+
+        this.setLatLng(latlng);
+        this.rangeMarker.setLatLng(latlng);
+        this.minRangeMarker.setLatLng(latlng);
+        this.miniCircle.setLatLng(latlng);
+        this.fobCircle.setLatLng(latlng);
+        this.posPopUp.setLatLng(latlng);
+
+        this._handleDragEnd();
+        return true;
     },
 
     _handleMouseOver: function(){
@@ -534,7 +561,7 @@ export const squadWeaponMarker = squadMarker.extend({
         // Broadcast the deletion to the session
         if (broadcast && App.session.ws && App.session.ws.readyState === WebSocket.OPEN) {
             App.session.ws.send(JSON.stringify({ type: "DELETE_WEAPON", uid: this.uid }));
-            console.debug(`Sent delete request for weapon ${this.uid}`);
+            console.debug(`[SESSION] Sent delete request for weapon ${this.uid}`);
         }
 
         this.off();
@@ -669,7 +696,7 @@ export const squadStratMarker = squadMarker.extend({
         // Broadcast to the session
         if (broadcast && App.session.ws && App.session.ws.readyState === WebSocket.OPEN) {
             App.session.ws.send(JSON.stringify({ type: "DELETE_MARKER", uid: this.uid }));
-            console.debug(`Sent delete request for marker with UID: ${this.uid}`);
+            console.debug(`[SESSION] Sent delete request for marker with UID: ${this.uid}`);
         }
 
         // Remove the marker from targets array history
@@ -749,7 +776,7 @@ export const squadStratMarker = squadMarker.extend({
                     })
                 );
 
-                console.debug(`Sent move request for marker with UID: ${uid}, new position: (${newLatLng.lat}, ${newLatLng.lng})`);
+                console.debug(`[SESSION] Sent move request for marker with UID: ${uid}, new position: (${newLatLng.lat}, ${newLatLng.lng})`);
             }
         }
         

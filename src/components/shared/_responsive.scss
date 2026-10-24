@@ -8,14 +8,19 @@
 
 @media (height >= 35em) {
     header {
-        #mapSelector {
+        .mapSelector #mapSelector {
             .select2-results__options {
                 max-height: 470px;
             }
         }
+        .mapSelector #layerSelector {
+            .select2-results__options {
+                max-height: 350px;
+            }
+        }
         .weaponSelector #weaponSelector {
             .select2-results__options {
-                max-height: 400px;
+                max-height: 450px;
             }
         }
     }
@@ -26,15 +31,20 @@
 
 @media (height >= 45em) {
     header {
-        .mapSelector #mapSelector, .weaponSelector #layerSelector {
+        .mapSelector #mapSelector {
             .select2-results__options {
                 // line-height: 0.85em;
                 max-height: 770px;
             }
         }
+        .mapSelector #layerSelector {
+            .select2-results__options {
+                max-height: 600px;
+            }
+        }
         .weaponSelector #weaponSelector {
             .select2-results__options {
-                max-height: 500px;
+                max-height: 650px;
             }
         }
     }
@@ -45,9 +55,14 @@
 
 @media (height >= 50em) {
     header {
-        #mapSelector {
+        .mapSelector #mapSelector {
             .select2-results__options {
-                max-height: 850px;
+                max-height: 650px;
+            }
+        }
+        .mapSelector #layerSelector {
+            .select2-results__options {
+                max-height: 650px;
             }
         }
     }
@@ -70,18 +85,51 @@
             width: 40px;
         }
     }
-    #factionsDialog #factionVehicles .vehicle-card .image .tags {
-        height: 3em!important;
-        .tag {
-            width: 3em!important;
-            .passenger {
-                font-size: 11px!important;
-                margin-left: 10px!important;;
+    #factionsDialog #factionVehicles .vehicle-card .image {
+        .tags, .links {
+            .tag {
+                width: 3em!important;
+                height: 3em!important;
+                .passenger {
+                    font-size: 11px!important;
+                    margin-left: 10px!important;
+                }
             }
+        }
+        .links {
+            .wiki-link > span { font-size: 1em!important; }
+            .armor-link > span { font-size: 0.7em!important; }
         }
     }
     #commanderAssets .commanderAssets img {
         height: 35px;
+    }
+    dialog#layerInformation {
+        .layerThumbnail {
+            width: 170px;
+        }
+        .layerCommandRow {
+            input {
+                padding: 0.6em 2.8em 0.6em 0.7em;
+            }
+            .layerCommandCopyBtn {
+                width: 2.4em;
+                height: 2.4em;
+            }
+        }
+    }
+    #modsPanelContainer {
+        gap: 0.7em;
+        .modToggleTile {
+            min-height: 6em;
+            padding: 1.1em 1.3em;
+            .modTileLogo {
+                width: 6em;
+            }
+            .modTileName {
+                padding-right: 5.7em;
+            }
+        }
     }
     #characteristics .characteristics img {
         height: 30px;
@@ -121,10 +169,6 @@
              .unit-option .unit-name {
                 font-size: 1.4em;
             }
-        }
-        .btn-pin {
-            max-width: 100px;
-            font-size: 0.8em;
         }
         #factionMenu {
             font-size: 0.8em;
@@ -173,8 +217,7 @@
             }
         }
     }
-
-    #helpDialog {
+    #helpDialog, #changelogDialog, #layerInformation {
         width: 100vw;
         height: 100dvh;
         max-width: 100%;
@@ -266,6 +309,9 @@
             span {
                 display: inline-block;
             }
+            .logoSkull {
+                vertical-align: middle;
+            }
             span:nth-child(3) {
                 width: auto;
             }
@@ -328,6 +374,16 @@
 }
 
 
+/* < 992px: layerInformation's two tables wrap into a vertical stack instead of
+   sitting side by side, so kill the bottom margin between them. Horizontal
+   side margins are untouched, and the >= 992px side-by-side layout below
+   still sets its own margin. */
+@media screen and (width < 62em) {
+    dialog#layerInformation table:first-of-type {
+        margin-bottom: 0;
+    }
+}
+
 /* ≥ 992px */
 
 @media screen and (width >= 62em) {
@@ -337,7 +393,7 @@
             min-width: 250px;
         }
     }
-    dialog {
+    dialog, #threeDView {
         font-size: 0.7em;
         table {
             width: 44%;
@@ -346,9 +402,11 @@
         &#weaponInformation {
             max-width: 600px;
         }
+        &#layerInformation {
+            max-width: 800px;
+        }
         &#helpDialog {
             font-size: 0.7em;
-            height: 625px;
             width: 600px;
             table {
                width: 90%;
@@ -373,8 +431,11 @@
 
 @media screen and (width >= 87.5em) {
     header {
-        .select2-results__options {
-            font-size: 1em;
+        // Match base rules specificity in header.scss so these actually apply
+        .weaponSelector .select2-results__options,
+        .mapSelector #mapSelector .select2-results__options,
+        .mapSelector #layerSelector .select2-results__options {
+            font-size: 0.9em;
         }
     }
 }
@@ -396,32 +457,48 @@
                 padding: 2em 1.5em 0 0;
                 #serverSelector {
                     padding-bottom: 5em;
+                    .select2-container {
+                        min-width: 300px;
+                        max-width: 300px;
+                        padding-bottom: 1em;
+                        font-size: 1.25em;
+                    }
+                    .select2-selection__placeholder {
+                        font-size: 1.05em;
+                    }
+                    .select2-selection__rendered {
+                        font-size: 1.1em;
+                    }
                 }
                 #layerSelector {
                     padding-top: 5em;
                 }
             }
+            // .mapSelector prefix needed to outweigh base rules in header.scss
             #weaponSelector,
-            #mapSelector,
             #ammoSelector,
-            #layerSelector {
+            .mapSelector #mapSelector,
+            .mapSelector #layerSelector {
                 .select2-container {
-                    min-width: 350px;
-                    max-width: 350px;
+                    min-width: 300px;
+                    max-width: 300px;
                     padding-bottom: 1em;
-                    font-size: 1.4em;
+                    font-size: 1.25em;
                 }
                 .select2-results__options {
-                    font-size: 1.2em;
+                    font-size: 0.9em;
                     // line-height: 1.3em;
-                    max-height: 1100px;
+                    max-height: 1250px;
                 }
                 .select2-selection__placeholder {
-                    font-size: 1.1em;
+                    font-size: 1.05em;
                 }
                 .select2-selection__rendered {
-                    font-size: 1.2em;
+                    font-size: 1.1em;
                 }
+            }
+            .mapSelector #layerSelector .select2-results__options {
+                max-height: 1000px;
             }
         }
         #classic_ui {
@@ -438,6 +515,32 @@
             }
             .coord img {
                 height: 75px;
+            }
+        }
+        #mapLayerMenu {
+            top: 26%;
+            .btn {
+                font-size: 1.6em;
+                width: 50px;
+                height: 50px;
+            }
+            #sessionActions {
+                width: 50px;
+            }
+        }
+        #factionsButton button.btn-faction {
+            font-size: 0.95em;
+            .factionBarFlag {
+                width: 56px;
+            }
+            .factionBarUnit {
+                width: 40px;
+                height: 40px;
+                img {
+                    min-width: 40px;
+                    width: 40px;
+                    height: 40px;
+                }
             }
         }
         .tippy-box {

@@ -339,11 +339,13 @@
 </br>
 
 🗺️ Map System built on **[Leaflet JS](https://leafletjs.com/)**  
-🖼️ Map Images, Marker Icons are from SquadSDK by **[OffWorld Industries](https://www.offworldindustries.com/)**
-🧮 Layers & Factions Data are extracted thanks to **[Squad-Wiki Pipeline Map Data](https://github.com/Squad-Wiki/squad-wiki-pipeline-map-data)** SDK extractor  tools *(Special thanks to [Shanomac99](https://github.com/Shanomac99))*  
+🖼️ Map Images, Marker Icons are from SquadSDK by **[OffWorld Industries](https://www.offworldindustries.com/)**  
+🧮 Layers & Factions Data are extracted thanks to **[SquadPipeline](https://github.com/yobaNGE/squad-map-data-CUE4Parse)**  *(a huge thanks to [yobaNGE](https://github.com/yobaNGE) for this amazing tool)*  
 🖥️ Servers data provided by **[BattleMetrics](https://www.battlemetrics.com)**  
 🗣️ AI Text-To-Speech made with **[Luvvoice](https://luvvoice.com/)**  
 🔣 Icons by **[FontAwesome](https://fontawesome.com/icons)**  
+⛰️ heightmaps extracted with **[SquadHeight](https://github.com/Metroseksuaali/SquadHeight)** by [Metroseksuaali](https://github.com/Metroseksuaali)  
+
 👌🏼 Thanks to everyone supporting the project with kinds words, clever suggestions, and better code than mine
 
 
@@ -362,6 +364,7 @@
 * [TheMatheusDev](https://github.com/TheMatheusDev)  
 * [SphaeroX](https://github.com/SphaeroX)  
 * sitroz
+* [yobaNGE](https://github.com/yobaNGE)  
 
 
 

@@ -37,7 +37,7 @@ export const squadMinimap = Map.extend({
 
         let customOptions = {
             attributionControl: false,
-            boxZoom: true,
+            boxZoom: false,
             center: [-pixelSize/2, pixelSize/2],
             closePopupOnClick: false,
             crs: CRS.Simple,
@@ -125,6 +125,7 @@ export const squadMinimap = Map.extend({
         this.gameToMapScale = this.pixelSize / this.activeMap.size;
         this.gameToMapScaleY = this.pixelSize / this.activeMap.sizeY;
         this.mapToGameScale = this.activeMap.size / this.pixelSize;
+        this.gridSize = this.activeMap.gridSize ?? 300;
         this.detailedZoomThreshold = ( 3 + (this.activeMap.size / 7000) ) * 0.8;
        
         // Load Heightmap
@@ -137,6 +138,26 @@ export const squadMinimap = Map.extend({
         this.grid = new squadGrid(this, {opacity: App.userSettings.gridOpacity}).addTo(this.layerGroup);
         this.grid.setBounds([[0,0], [-this.pixelSize, this.pixelSize]]);
 
+        // Some maps only ship a basemap - disable the other layer buttons
+        // and fall back to basemap visually (URL type param is left untouched)
+        const singleLayer = this.activeMap.singleLayer === true;
+        $(".btn-topomap, .btn-terrainmap").prop("disabled", singleLayer);
+        // .btn-hd stays a real (non-disabled) button so its tippy tooltip
+        // can still show on hover/touch to explain why it's locked
+        $(".btn-hd").toggleClass("locked", singleLayer);
+        if (singleLayer) {
+            $("#mapLayerMenu .layers").removeClass("active");
+            $(".btn-basemap").addClass("active");
+            $(".btn-hd").removeClass("active");
+        } else {
+            $(".btn-hd").toggleClass("active", App.userSettings.highQualityImages);
+        }
+
+        // Some maps (e.g. fully underground ones) have no meaningful surface terrain -
+        // same locked-but-hoverable treatment as .btn-hd above, so the tooltip can still
+        // explain why.
+        $(".btn-3d").toggleClass("locked", this.activeMap.no3D === true);
+
         // load map
         this.changeLayer(true);
     },
@@ -146,15 +167,16 @@ export const squadMinimap = Map.extend({
      * remove existing layer and replace it
      */
     changeLayer: function(changemap = false) {
-        const LAYERMODE = $("#mapLayerMenu .active").attr("value");
+        const LAYERMODE = this.activeMap.singleLayer ? "basemap" : $("#mapLayerMenu .active").attr("value");
         const OLDLAYER = this.activeLayer;
 
         // Show spinner
         this.spin(true, this.spinOptions);
 
         let imagePath = `${this.activeMap.mapURL}${LAYERMODE}`;
+        const useHQ = App.userSettings.highQualityImages && !this.activeMap.singleLayer;
 
-        if (App.userSettings.highQualityImages) {
+        if (useHQ) {
             // Use TileLayer for high-quality images
             let tilePath = `${process.env.API_URL}${imagePath}_hq/{z}_{x}_{y}.webp`;
             this.activeLayer = new TileLayer(tilePath, {
@@ -175,7 +197,7 @@ export const squadMinimap = Map.extend({
     
 
         this.activeLayer.once("load", () => {
-            if (App.userSettings.highQualityImages) {
+            if (useHQ) {
                 if (OLDLAYER) OLDLAYER.remove();
                 this.spin(false);
             }
@@ -272,6 +294,7 @@ export const squadMinimap = Map.extend({
         // Empty and clear buttons of DOM elements
         $(".dropbtn8, .dropbtn9, .dropbtn10, .dropbtn11").empty();
         $("#factionsTab, #factionsButton, .btn-delete, .btn-undo").hide();
+        if (App.ui != 0) $(".weaponSelector").removeClass("active animate__fadeIn");
 
         // Reset map view
         this.setView([-this.pixelSize/2, this.pixelSize/2], 2);
@@ -422,12 +445,12 @@ export const squadMinimap = Map.extend({
         // to minimize confusion
         const x = lng * this.mapToGameScale;
         const y = lat * this.mapToGameScale;
-        const kp = 300 / 3 ** 0; // interval of main keypad, e.g "A5"
+        const kp = this.gridSize / 3 ** 0; // interval of main keypad, e.g "A5"
         const kpNumber = `0000${Math.floor(y / kp) + 1}`.slice(-2);
-        const s1 = 300 / 3 ** 1; // interval of first sub keypad
-        const s2 = 300 / 3 ** 2; // interval of second sub keypad
-        const s3 = 300 / 3 ** 3; // interval of third sub keypad
-        const s4 = 300 / 3 ** 4; // interval of third sub keypad
+        const s1 = this.gridSize / 3 ** 1; // interval of first sub keypad
+        const s2 = this.gridSize / 3 ** 2; // interval of second sub keypad
+        const s3 = this.gridSize / 3 ** 3; // interval of third sub keypad
+        const s4 = this.gridSize / 3 ** 4; // interval of third sub keypad
         
         // basic grid, e.g. B5
         const kpCharCode = 65 + Math.floor(x / kp);
@@ -507,7 +530,7 @@ export const squadMinimap = Map.extend({
 
         // If in a session, broadcast the new weapon with a unique identifier
         if (!uid && App.session.ws && App.session.ws.readyState === WebSocket.OPEN) {
-            console.debug("Creating new weapon with uid", newMarker.uid);
+            console.debug("[SESSION] Sending new weapon with uid", newMarker.uid);
             App.session.ws.send(
                 JSON.stringify({
                     type: "ADDING_WEAPON",
@@ -526,14 +549,14 @@ export const squadMinimap = Map.extend({
      * @param {LatLng} latlng - coordinates of the new target
      * @param {Event} e - event that triggered the creation
      * @param {String} uid - Optional - unique identifier of the target if created by the session
+     * @param {Boolean} skipApiReport - Optional - if true, don't report this target to the squadcalc API (used for batch creation, e.g. carpet/rectangle bombing)
      */
-    createTarget(latlng, event, uid = false){
+    createTarget(latlng, event, uid = false, skipApiReport = false){
 
-        let target = new squadTargetMarker(latlng, {animate: App.userSettings.targetAnimation, uid: uid}, this).addTo(this.markersGroup);
-        
-        console.debug("Creating new target with uid", target.uid);
+        let target = new squadTargetMarker(latlng, {animate: App.userSettings.targetAnimation, uid: uid, skipApiReport: skipApiReport}, this).addTo(this.markersGroup);
+
         if (!uid && App.session.ws && App.session.ws.readyState === WebSocket.OPEN) {
-            console.debug("sending new target with uid", target.uid);
+            console.debug("[SESSION] sending new target with uid", target.uid);
             App.session.ws.send(
                 JSON.stringify({
                     type: "ADDING_TARGET",
@@ -764,7 +787,7 @@ export const squadMinimap = Map.extend({
         $(".btn-delete, .btn-undo").show();
 
         if (!uid && App.session.ws && App.session.ws.readyState === WebSocket.OPEN) {
-            console.debug("Creating a marker with uid", newMarker.uid);
+            console.debug("[SESSION] Creating a marker with uid", newMarker.uid);
         
             // Send the MOVING_WEAPON event to the server
             App.session.ws.send(
@@ -828,7 +851,7 @@ export const squadMinimap = Map.extend({
     
                 // Send circle data via WebSocket
                 if (App.session.ws && App.session.ws.readyState === WebSocket.OPEN) {
-                    console.debug("Sending new circle with uid", circle.uid);
+                    console.debug("[SESSION] Sending new circle with uid", circle.uid);
                     App.session.ws.send(
                         JSON.stringify({
                             type: "ADDING_CIRCLE",
@@ -887,7 +910,7 @@ export const squadMinimap = Map.extend({
                 
                 // Send the arrow to the WebSocket server
                 if (App.session.ws && App.session.ws.readyState === WebSocket.OPEN) {
-                    console.debug("sending new arrow with uid", arrow.uid);
+                    console.debug("[SESSION] Sending new arrow with uid", arrow.uid);
                     App.session.ws.send(
                         JSON.stringify({
                             type: "ADDING_ARROW",
@@ -946,7 +969,7 @@ export const squadMinimap = Map.extend({
 
                 // Send rectangle data via WebSocket
                 if (App.session.ws && App.session.ws.readyState === WebSocket.OPEN) {
-                    console.debug("Sending new rectangle with uid", rectangle.uid);
+                    console.debug("[SESSION] Sending new rectangle with uid", rectangle.uid);
                     App.session.ws.send(
                         JSON.stringify({
                             type: "ADDING_RECTANGLE",

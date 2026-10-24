@@ -1,4 +1,148 @@
-# <img src="https://img.shields.io/badge/-minor%20release-cd6f68?style=for-the-badge"> **43.0.0** *(2026-05-07)*
+# <img src="https://img.shields.io/badge/-minor%20release-cd6f68?style=for-the-badge"> **46.1.0** *(2026-10-09)*
+
+👻 *(You can disable the horrible Halloween font in `Settings > Map`.)*
+
+</br><img src="https://img.shields.io/badge/-new%20features-green">
+- 3D Mode: The minimap is now a replica of the regular 2D map. You can interact with it (select flags, create markers and targets) without leaving 3D mode
+- 3D Mode: Left-click to place an "Observation Marker" that always shows its distance from the camera (Thanks grey275!)
+- 3D Mode: All markers created on the 2D map now also appear in 3D (Thanks grey275!)
+- 3D Mode: Added "Terrain" as an additional texture
+- A toast now shows what's new after each update
+- Reworked the 3D settings card
+- Updated the Fool's Road minimap
+- Reworked toast colors
+
+</br><img src="https://img.shields.io/badge/-bug%20fixes-b22">  
+- Fixed a UX bug when the Session button is hidden from the map menu
+- The map grid now displays the last column/row label when there's enough room for it
+- The 3D button can now be hidden from the map menu
+- 3D Mode: The minimap now scales with screen size and is hidden on mobile
+- 3D Mode: Controls are now shown while flying (with a setting to show/hide them)
+- 3D Mode: Fixed the bottom of the settings card being covered by the layer selector
+- 3D Mode: Added a button to exit "Flying Mode" on mobile
+- 3D Mode: Improved asset caching so assets are no longer re-downloaded every time
+
+</br></br><!-- CHANGELOG SPLIT MARKER -->
+
+
+# <img src="https://img.shields.io/badge/-major%20release-b22222?style=for-the-badge"> **46.0.0** *(2026-10-02)*
+
+SquadCalc now uses a new layer extractor tool made by **yobaNGE**: **[SquadPipeline](https://github.com/yobaNGE/squad-map-data-CUE4Parse)**.
+
+</br><img src="https://img.shields.io/badge/-new%20features-green">
+
+- **Mods!**   
+Added maps, layers, factions and server support for 6 new mods. You can enable them from `Settings > Mods` to browse modded layers and factions. You can also sync with modded servers running these mods:
+  - Galactic Contention (170+ layers, 24 maps)
+  - Steel Division (110+ layers)
+  - SuperMod (190+ layers, 2 maps: `Chornivsk` and `Hrodna Border`)
+  - Squad Admin Tools (2 seeding layers)
+  - Warzone (170+ layers)
+  - Infinite Warefare (1 weapon)
+- **3D Maps!**  
+You can now browse every vanilla map in 3D! Visualise terrain, buildings, vegetation and layers while flying around in camera mode.
+  - Open the 3D view at any point by right-clicking the map
+  - Share your exact camera position with a link
+- **Lane logic rework** (Thanks Metroseksuaali!)
+  - In RAAS/Invasion, SquadCalc now displays every possible position for flags that can spawn in more than one spot
+  - Flags can now be selected at any step
+  - Hovering a flag now previews its possible lanes
+- Updated IMF flag and Goose Bay minimap to the 10.6 version
+- Added two new weapons from Steel Division: `SCUD` and `Shahed-136` (thanks yobaNGE!)
+- Added a new layer information panel that displays layer details and the admin commands to set the layer (thanks lillg4!)
+- Added Brazilian-Portuguese translations by Eduardo Nonemacher ([#511](https://github.com/sh4rkman/SquadCalc/pull/511))
+- Added Turkish translations by Kauda
+
+</br><img src="https://img.shields.io/badge/-%20improv%20-orange">  
+- Multi-part capture zones on the 2D map now show as a single outline instead of stacked shapes (Thanks Metroseksuaali!)
+- Languages are now sorted alphabetically
+- You can now sort servers by player count
+
+</br><img src="https://img.shields.io/badge/-bug%20fixes-b22">  
+- Fixed SquadCalc not drawing some rare protection zones
+- Fixed some buildings not registered in the Black Coast heightmap (Thanks yobaNGE!)
+- Fixed invisible buildings appearing on the Sanxian heightmap (Thanks Metroseksuaali!)
+
+</br></br><!-- CHANGELOG SPLIT MARKER -->
+
+
+
+# <img src="https://img.shields.io/badge/-minor%20release-cd6f68?style=for-the-badge"> **45.0.2** *(2026-07-12)*
+
+</br><img src="https://img.shields.io/badge/-bug%20fixes-b22">  
+- Fixed faction bar background blur effects not working on Chrome/Edge
+- Fixed responsiveness of various UX element on 1440p monitors (thanks yobaNGE!)
+- Fixed dialogs close button being invisible on Safari (fix [#503](https://github.com/sh4rkman/SquadCalc/issues/503), thanks Josephant & ButtGrinder!)
+
+</br></br><!-- CHANGELOG SPLIT MARKER -->
+
+# <img src="https://img.shields.io/badge/-minor%20release-cd6f68?style=for-the-badge"> **45.0.1** *(2026-07-10)*
+
+</br><img src="https://img.shields.io/badge/-bug%20fixes-b22">  
+- Fixed the changelog being permanently stuck open in legacy mode (Thanks DeeplyBreatheInAir!)
+- Fixed several background blur effects not working on Chrome/Edge (fix [#500](https://github.com/sh4rkman/SquadCalc/issues/500))
+- Fixed settings sliders theme on Chrome/Edge
+- Fixed missing French/Ukrainian translations in the settings dialog
+
+</br></br><!-- CHANGELOG SPLIT MARKER -->
+
+
+# <img src="https://img.shields.io/badge/-major%20release-b22222?style=for-the-badge"> **45.0.0** *(2026-07-08)*
+
+
+Heightmaps have been fully reworked: they are now way more precise (each square meter has its own average height), and they now take buildings and other assets into account! If you are shooting from or at a building, its height will now be taken into account when calculating the required elevation. Thanks a lot to **yobaNGE** for the loading mechanics and **Metroseksuaali** for the heightmap export tool!
+
+</br><img src="https://img.shields.io/badge/-new%20features-green">
+- You can now create carpet bombs by holding `alt` and dragging a target marker
+- You can now create a grid of targets by holding `shift` and dragging a target marker (Thanks Sh1nS0u & YuKI!)
+- You can now move a weapon by typing precise coordinates (thanks Josephant!)
+- Added a link to the [squad-armor.com](https://squad-armor.com) viewer for each vehicle in the factions panel (thanks MJH1606!)
+- Added a dialog to browse the changelog directly from squadcalc.app
+- You can now search the map & weapon dropdowns
+
+</br><img src="https://img.shields.io/badge/-%20improv%20-orange"> 
+- In the faction panel, vehicle images are now mirrored and facing each other
+- Improved the projectile simulation panel so it now displays some terrain before the weapon and after the target
+- Removed Belaya and Flooded Narva from the map list 😭
+- Fixed `M109` height & angle offset (thanks yobaNGE, fix [#495](https://github.com/sh4rkman/SquadCalc/issues/495))
+
+</br><img src="https://img.shields.io/badge/-bug%20fixes-b22">   
+- Fixed laggy map scrolling on first load (thanks jesrt!)
+- Fixed Factions & Units not loading correctly when opening a URL containing a server id (Thanks wwrp450!)
+- Fixed missing vehicle images for `ZSL92 IFV` & `ZSL92A APC QLZ87`
+- Fixed `map_ifv` icon (thanks driver_061!)
+
+</br></br><!-- CHANGELOG SPLIT MARKER -->
+
+
+# <img src="https://img.shields.io/badge/-major%20release-b22222?style=for-the-badge"> **44.0.0** *(2026-05-22)*
+
+</br><img src="https://img.shields.io/badge/-new%20features-green">
+- Menu is now fully customisable from settings : show/hide the buttons you want in your toolbar
+- Added a new "Share" button that allows sharing a long URL holding the selected factions and units (thanks Hans-Vader, [#481](https://github.com/sh4rkman/SquadCalc/issues/481))
+- Weapon dialog now display the shell damage ([#483](https://github.com/sh4rkman/SquadCalc/issues/483))
+- Added `PZL07` Chinese 122mm self-propelled artillery from Infinite Warefare mod (Thanks ovalnik!)
+- Added `Type63` multiple rocket launcher from Supermod (Thanks MJH1606 !)
+- Modded weapons rework
+  - Each mod now has its own category in the weapon dropdown
+  - When "Enable modded weapons" is on, individual mods can be toggled on/off in the settings
+
+</br><img src="https://img.shields.io/badge/-bug%20fixes-b22">  
+- Fixed layer not loading when using an URL with a server in it
+- Fixed weapon selector not hiding when switching map (fix [#480](https://github.com/sh4rkman/SquadCalc/issues/480))
+
+</br></br><!-- CHANGELOG SPLIT MARKER -->
+
+
+# <img src="https://img.shields.io/badge/-minor%20release-cd6f68?style=for-the-badge"> **43.0.1** *(2026-05-12)*
+
+</br><img src="https://img.shields.io/badge/-bug%20fixes-b22">  
+- Fixed weapon selector not showing on legacy mode (thanks scrubbadubba98!)
+
+</br></br><!-- CHANGELOG SPLIT MARKER -->
+
+
+# <img src="https://img.shields.io/badge/-major%20release-b22222?style=for-the-badge"> **43.0.0** *(2026-05-07)*
 
 </br><img src="https://img.shields.io/badge/-new%20features-green">
 - When servers are favorited, they now appear in a new dropdown button directly accessible from the map
@@ -26,10 +170,10 @@
 - In the server browser, teams are now correctly hidden on mobile (fix [#472](https://github.com/sh4rkman/SquadCalc/issues/472))
 - Fixed session links sometimes not working when opening them in a new tab (fix [#458](https://github.com/sh4rkman/SquadCalc/issues/458))
 - Vehicle emplacements that disappear will now prioritise vehicles that don't respawn, as in-game.
-- Changed Hellcanon German translation (thanks Hans Wurst!)
+- Changed `Hellcanon` German translation (thanks Hans Wurst!)
 - Fixed unit characteristics not hiding when removing a faction entirely
 - Fixed the server browser tooltip staying open after closing the server list
-- Fixed FV107 missing icon
+- Fixed `FV107` missing icon
 - Fixed vehicle respawn alerts sound not playing
 - Fix attempt at caching bug that displayed the old version after each update
 
@@ -106,7 +250,7 @@
 # <img src="https://img.shields.io/badge/-minor%20release-cd6f68?style=for-the-badge"> **42.0.5** *(2026-01-17)*
 
 </br><img src="https://img.shields.io/badge/-bug%20fixes-b22">  
-- M1O-120-RTF1 now use milliradians as intended (Thanks Sh1nS0u_!)
+- `M1O-120-RTF1` now use milliradians as intended (Thanks Sh1nS0u_!)
 
 </br></br><!-- CHANGELOG SPLIT MARKER -->
 
@@ -120,7 +264,7 @@
 # <img src="https://img.shields.io/badge/-minor%20release-cd6f68?style=for-the-badge"> **42.0.3** *(2026-01-11)*
 
 </br><img src="https://img.shields.io/badge/-bug%20fixes-b22">  
-- Updated M777 velocity (Thanks ovalnik/Dutch!)
+- Updated `M777` velocity (Thanks ovalnik/Dutch!)
 
 </br></br><!-- CHANGELOG SPLIT MARKER -->
 
@@ -128,7 +272,7 @@
 # <img src="https://img.shields.io/badge/-minor%20release-cd6f68?style=for-the-badge"> **42.0.2** *(2026-01-09)*
 
 </br><img src="https://img.shields.io/badge/-bug%20fixes-b22">  
-- Fixed M121 having wrong velocity (Thanks Matador!)
+- Fixed `M121` having wrong velocity (Thanks Matador!)
 
 </br></br><!-- CHANGELOG SPLIT MARKER -->
 
@@ -142,13 +286,13 @@
 # <img src="https://img.shields.io/badge/-major%20release-b22222?style=for-the-badge"> **42.0.0** *(2026-01-08)*
 
 </br><img src="https://img.shields.io/badge/-new%20features-green">  
-- Added French 120 Mortar (MO120RTF1) from SuperMod *(thanks Kryger)*
-- Added Ural HellCanon from Steel Division *(Thanks Mooraragi)*
+- Added French 120 Mortar `MO120RTF1` from SuperMod *(thanks Kryger)*
+- Added `Ural HellCanon` from Steel Division *(Thanks Mooraragi)*
 
 </br><img src="https://img.shields.io/badge/-bug%20fixes-b22">  
-- Fixed missing M777 marker *(thanks Madlifer, Dutch)*
+- Fixed missing `M777` marker *(thanks Madlifer, Dutch)*
 - Fixed default value for fontsize & zoom speed settings
-- Fixed UB32 & Technical UB32 icon that were reverted
+- Fixed `UB32` & `Technical UB32` icon that were reverted
 - Marker's icons placed by other members within a session now correctly update when moved out of range
 
 </br><img src="https://img.shields.io/badge/-%20improv%20-orange"> 

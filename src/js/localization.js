@@ -1,6 +1,8 @@
 import i18next from "i18next";
 import HttpApi from "i18next-http-backend";
 import { App } from "../app.js";
+import pkg from "../../package.json";
+const { version } = pkg;
 
 /**
  * Update every label with the correct localization text
@@ -9,7 +11,7 @@ export function loadLanguage(LANGUAGES) {
     const LANG_SELECTOR = $(".dropbtn4");
 
     i18next.use(HttpApi).init({
-        fallbackLng: false,
+        fallbackLng: "en",
         ns: [
             "tooltips",
             "settings",
@@ -22,7 +24,7 @@ export function loadLanguage(LANGUAGES) {
         ],
         debug: false,
         backend: {
-            loadPath: "./locales/{{lng}}/{{ns}}.json",
+            loadPath: `./locales/{{lng}}/{{ns}}.json?v=${version}`,
         }
     }, function(err) {
         if (err) return console.error(err);
@@ -95,6 +97,8 @@ function updateContent() {
     });
 
     if (App.minimap.layer) App.minimap.layer.polyline.updateMeasurements();
+    if (App.userSettings) App._renderModTiles();
+    $(".threeDTextureSelect").trigger("change.select2"); // re-render its selected option's new text
    
     const selectorWidth = window.matchMedia("screen and (min-width: 124em) and (min-height: 68em)").matches ? "350px" : "250px";
 
@@ -105,14 +109,14 @@ function updateContent() {
     $(".dropbtn").select2("destroy").select2({
         dropdownCssClass: "dropbtn",
         dropdownParent: $("#mapSelector"),
-        minimumResultsForSearch: -1,
+        minimumResultsForSearch: 1,
         width: selectorWidth,
     });
 
     $(".dropbtn2").select2("destroy").select2({
         dropdownCssClass: "dropbtn",
         dropdownParent: $("#weaponSelector"),
-        minimumResultsForSearch: -1,
+        minimumResultsForSearch: 1,
         width: selectorWidth,
     });
 
@@ -128,7 +132,7 @@ function updateContent() {
         dropdownParent: $("#layerSelector"),
         allowClear: true,
         placeholder: layerPlaceholder,
-        minimumResultsForSearch: -1,
+        minimumResultsForSearch: 1,
         width: selectorWidth,
     });
 
