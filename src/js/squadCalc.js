@@ -10,6 +10,7 @@ import { checkApiHealth, fetchLayersByMap, fetchLayerByName } from "./squadCalcA
 import { initWebSocket } from "./smcConnector.js";
 import { LatLng } from "leaflet";
 import SquadServersBrowser from "./squadServersBrowser.js";
+import { openKrestServer } from "./krestServers.js";
 import SquadSession from "./squadSession.js";
 import SquadFiringSolution from "./squadFiringSolution.js";
 import SquadSettings from "./squadSettings.js";
@@ -1045,6 +1046,8 @@ export default class SquadCalc {
             const searchInput = document.getElementById("serverSearch");
             if (searchInput) searchInput.focus();
         });
+
+        $(document).on("click", "#krestServers button", (event) => openKrestServer(event.currentTarget.dataset.server));
 
         $(document).on("favorites:changed", (_event, { favorites, servers }) => {
             const favoriteServers = (servers || []).filter(s => favorites.has(String(s.id)));
